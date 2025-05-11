@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Blog Post</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#3b82f6', secondary: '#64748b' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
+        .ql-editor {
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .ql-toolbar {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .tag-item {
+            transition: all 0.2s ease;
+        }
+
+        .tag-item:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <header class="w-full bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="#" class="font-['Pacifico'] text-primary text-2xl">logo</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="flex items-center text-gray-700 hover:text-primary">
+                            <div class="w-8 h-8 flex items-center justify-center">
+                                <i class="ri-notification-3-line ri-lg"></i>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="flex items-center">
+                        <button class="flex items-center space-x-2 text-gray-700 hover:text-primary">
+                            <div class="w-8 h-8 bg-gray-200 rounded-full overflow-hidden">
+                                <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20photo%20of%20a%20young%20man%20with%20short%20dark%20hair%2C%20neutral%20expression%2C%20simple%20background%2C%20high%20quality%2C%20professional%20headshot&width=100&height=100&seq=1&orientation=squarish"
+                                    alt="User avatar" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-sm font-medium">Michael Anderson</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+
+            <form id="blog-form" class="p-6 space-y-6">
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="title" name="title" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+                        placeholder="Enter your blog title">
+                    <div class="flex justify-end mt-1">
+                        <span id="title-counter" class="text-xs text-gray-500">0/100</span>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <label for="editor" class="block text-sm font-medium text-gray-700 mb-1">
+                        Content <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="editor" name="content"
+                        class="w-full border border-gray-300 rounded resize-none overflow-hidden min-h-[80px] p-2"
+                        oninput="autoResize(this)">
+                    </textarea>
+                    <button type="button" id="addContentBtn"
+                        class="absolute right-2 bottom-[-22px] transform -translate-y-1/2 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 !rounded-button whitespace-nowrap"
+                        onclick="addContent()">
+                        Add Content
+                    </button>
+                    <div id="content-container" class="flex flex-wrap gap-2 mt-3">
+                        <!-- contents will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                            <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20photo%20of%20a%20young%20man%20with%20short%20dark%20hair%2C%20neutral%20expression%2C%20simple%20background%2C%20high%20quality%2C%20professional%20headshot&width=100&height=100&seq=1&orientation=squarish"
+                                alt="Author avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">Author</p>
+                            <p class="text-sm text-gray-500">Michael Anderson</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button type="button" id="cancel-btn"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-button hover:bg-gray-50 whitespace-nowrap">Cancel</button>
+                    <button type="button" id="save-draft-btn-bottom"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-button hover:bg-gray-50 whitespace-nowrap">Save
+                        as Draft</button>
+                    <button type="submit" id="publish-btn-bottom"
+                        class="px-4 py-2 bg-primary text-white rounded-button hover:bg-primary/90 whitespace-nowrap">Publish
+                        Post</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div id="notification"
+        class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        Post published successfully!
+    </div>
+
+    <script>
+        let content = [];
+    
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            const editor = document.getElementById('editor');
+            if (editor) autoResize(editor);
+        });
+    
+        function addContent() {
+            const tagText = document.getElementById('editor').value.trim();
+            if (!tagText) return;
+    
+            content.push(tagText);
+            document.getElementById('editor').value = "";
+            autoResize(document.getElementById('editor'));
+    
+            const tagItem = document.createElement('div');
+            tagItem.className = 'tag-item flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700';
+            tagItem.innerHTML = `
+                <span>${tagText}</span>
+                <button type="button" class="ml-2 text-gray-500 hover:text-gray-700">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-close-line"></i>
+                    </div>
+                </button>
+            `;
+    
+            tagItem.querySelector('button').addEventListener('click', function () {
+                const index = content.indexOf(tagText);
+                if (index > -1) content.splice(index, 1); // remove from array
+                tagItem.remove();
+            });
+    
+            document.getElementById('content-container').appendChild(tagItem);
+        }
+    
+        document.getElementById('blog-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+    
+            const title = document.getElementById('title').value.trim();
+            if (!title || content.length === 0) {
+                alert("Please enter a title and at least one content item.");
+                return;
+            }
+    
+            fetch('/add/new/blog', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, content })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to save blog post');
+                    return response.json();
+                })
+                .then(() => {
+                    document.getElementById('notification').classList.remove('translate-x-full');
+                    setTimeout(() => {
+                        document.getElementById('notification').classList.add('translate-x-full');
+                    }, 3000);
+                    // Reset form
+                    document.getElementById('title').value = '';
+                    document.getElementById('editor').value = '';
+                    content = [];
+                    document.getElementById('content-container').innerHTML = '';
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Failed to submit the form.");
+                });
+        });
+    </script>
+    
+</body>
+
+</html>

@@ -94,11 +94,14 @@ const {isLoggedIn,saveRedirectUrl,isAdmin,ensureAuthenticated} = require('./midd
 
 const userrouter = require("./routes/user.js");
 const otprouter = require("./routes/otp.js");
+const blogrouter = require("./routes/blogs.js");
+const teamrouter = require("./routes/team.js");
+const competitionrouter = require("./routes/competition.js");
 
 app.use("/user",userrouter);
 app.use("/user",otprouter);
-// app.use("/",productrouter);
-// app.use("/",paymentrouter);
+app.use("/",teamrouter);
+app.use("/",competitionrouter);
 // app.use("/",orderrouter);
 // app.use("/",cartrouter);
 // app.use("/",adminrouter);

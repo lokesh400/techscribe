@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Insights</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: '#3b82f6', secondary: '#64748b' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        input[type="search"]::-webkit-search-decoration,
+        input[type="search"]::-webkit-search-cancel-button,
+        input[type="search"]::-webkit-search-results-button,
+        input[type="search"]::-webkit-search-results-decoration {
+            display: none;
+        }
+
+        input[type="search"] {
+            -webkit-appearance: none;
+        }
+
+        .blog-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-pill {
+            transition: background-color 0.2s ease;
+        }
+
+        .category-pill:hover {
+            background-color: #e0e7ff;
+        }
+
+        .back-to-top {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.switch-slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked+.switch-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="sticky top-0 bg-white shadow-sm z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="#" class="text-2xl font-['Pacifico'] text-primary">logo</a>
+
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#" class="text-gray-900 font-medium hover:text-primary transition-colors">Home</a>
+                <a href="#" class="text-primary font-medium border-b-2 border-primary">Blog</a>
+                <a href="#" class="text-gray-900 font-medium hover:text-primary transition-colors">About</a>
+                <a href="#" class="text-gray-900 font-medium hover:text-primary transition-colors">Contact</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="search" placeholder="Search blogs..."
+                        class="w-40 md:w-64 pl-10 pr-4 py-2 text-sm border-none rounded bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <div
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-500">
+                        <i class="ri-search-line"></i>
+                    </div>
+                </div>
+
+                <button class="p-2 rounded-full hover:bg-gray-100 transition-colors md:hidden">
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="ri-menu-line text-gray-700"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        <section class="w-full md:w-3/4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Latest Articles</h1>
+                    <p class="text-gray-600 mt-2">Discover insights and knowledge from our expert writers</p>
+                </div>
+
+                <div class="mt-4 md:mt-0 flex items-center space-x-4">
+                    <div class="relative">
+                        <button id="categoryDropdown"
+                            class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-button text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap">
+                            <span>All Categories</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div id="categoryMenu"
+                            class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg z-10 py-1">
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">All Categories</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Technology</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Business</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Design</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Marketing</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Lifestyle</a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">Grid</span>
+                        <label class="custom-switch">
+                            <input type="checkbox" id="viewToggle">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="text-sm text-gray-600">List</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Blog Card 1 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=modern%20office%20workspace%20with%20laptop%2C%20coffee%20cup%2C%20and%20notebook%20on%20a%20wooden%20desk%20with%20natural%20light%20streaming%20through%20windows%2C%20professional%20minimalist%20setup&width=600&height=400&seq=1&orientation=landscape"
+                            alt="The Future of Remote Work" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Technology</span>
+                                <span class="text-xs text-gray-500">5 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">The Future of Remote Work: Trends to Watch
+                                in 2025</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">As remote work continues to evolve, new
+                                technologies and practices are shaping how teams collaborate across distances. Discover
+                                the key trends that will define workplace flexibility in the coming year.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20woman%20with%20short%20dark%20hair%2C%20neutral%20background%2C%20business%20casual%20attire%2C%20friendly%20smile&width=100&height=100&seq=2&orientation=squarish"
+                                        alt="Emily Richardson" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Emily Richardson</span>
+                                </div>
+                                <span class="text-xs text-gray-500">April 10, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 2 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=artificial%20intelligence%20visualization%20with%20glowing%20blue%20neural%20network%20connections%2C%20futuristic%20technology%20concept%20with%20abstract%20digital%20elements%20and%20code&width=600&height=400&seq=3&orientation=landscape"
+                            alt="AI Ethics" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">AI</span>
+                                <span class="text-xs text-gray-500">8 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">AI Ethics: Balancing Innovation and
+                                Responsibility</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">As artificial intelligence becomes more
+                                integrated into our daily lives, ethical considerations are more important than ever.
+                                This article explores the delicate balance between technological advancement and ethical
+                                responsibility.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle-aged%20man%20with%20glasses%20and%20short%20gray%20hair%2C%20neutral%20background%2C%20business%20professional%20attire&width=100&height=100&seq=4&orientation=squarish"
+                                        alt="David Chen" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">David Chen</span>
+                                </div>
+                                <span class="text-xs text-gray-500">April 8, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 3 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=sustainable%20green%20business%20concept%20with%20plant%20growing%20from%20coins%2C%20environmental%20conservation%20and%20financial%20growth%2C%20clean%20energy%20investment&width=600&height=400&seq=5&orientation=landscape"
+                            alt="Sustainable Business" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Business</span>
+                                <span class="text-xs text-gray-500">6 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Sustainable Business Models That Are
+                                Changing Industries</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">Sustainability is no longer just a
+                                buzzword but a business imperative. Discover how innovative companies are reimagining
+                                their business models to create value while addressing environmental and social
+                                challenges.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20man%20with%20dark%20skin%20and%20short%20black%20hair%2C%20neutral%20background%2C%20business%20casual%20attire%2C%20confident%20smile&width=100&height=100&seq=6&orientation=squarish"
+                                        alt="Marcus Johnson" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Marcus Johnson</span>
+                                </div>
+                                <span class="text-xs text-gray-500">April 5, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 4 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=modern%20web%20design%20workspace%20with%20tablet%20showing%20colorful%20UI%20design%2C%20color%20swatches%2C%20and%20design%20tools%20on%20a%20clean%20desk&width=600&height=400&seq=7&orientation=landscape"
+                            alt="UX Design Trends" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-pink-100 text-pink-800 rounded-full">Design</span>
+                                <span class="text-xs text-gray-500">4 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">UX Design Trends That Will Dominate in 2025
+                            </h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">User experience design continues to
+                                evolve rapidly. From immersive 3D interfaces to voice-first interactions, this article
+                                highlights the design trends that will shape digital products in the coming year.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20an%20asian%20woman%20with%20long%20black%20hair%2C%20neutral%20background%2C%20creative%20professional%20attire%2C%20friendly%20expression&width=100&height=100&seq=8&orientation=squarish"
+                                        alt="Sophia Kim" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Sophia Kim</span>
+                                </div>
+                                <span class="text-xs text-gray-500">April 3, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 5 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=digital%20marketing%20concept%20with%20analytics%20dashboard%20on%20computer%20screen%2C%20social%20media%20icons%2C%20and%20marketing%20strategy%20documents&width=600&height=400&seq=9&orientation=landscape"
+                            alt="Content Marketing" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">Marketing</span>
+                                <span class="text-xs text-gray-500">7 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Content Marketing Strategies for B2B
+                                Companies</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">B2B content marketing requires a
+                                different approach than B2C. Learn effective strategies to create valuable content that
+                                resonates with business audiences and drives meaningful engagement throughout the
+                                buyer's journey.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20woman%20with%20curly%20hair%20and%20glasses%2C%20neutral%20background%2C%20business%20professional%20attire&width=100&height=100&seq=10&orientation=squarish"
+                                        alt="Rebecca Martinez" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Rebecca Martinez</span>
+                                </div>
+                                <span class="text-xs text-gray-500">March 30, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 6 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=wellness%20and%20mindfulness%20concept%20with%20meditation%20space%2C%20yoga%20mat%2C%20plants%2C%20and%20natural%20light%20in%20a%20minimalist%20home%20setting&width=600&height=400&seq=11&orientation=landscape"
+                            alt="Mindfulness at Work" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Lifestyle</span>
+                                <span class="text-xs text-gray-500">5 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Mindfulness Practices for Better Work-Life
+                                Balance</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">In our always-on digital world, finding
+                                balance is more challenging than ever. Discover practical mindfulness techniques that
+                                can help you reduce stress, increase focus, and improve your overall wellbeing.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle-aged%20woman%20with%20shoulder-length%20brown%20hair%2C%20neutral%20background%2C%20casual%20professional%20attire&width=100&height=100&seq=12&orientation=squarish"
+                                        alt="Jennifer Wilson" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Jennifer Wilson</span>
+                                </div>
+                                <span class="text-xs text-gray-500">March 28, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 7 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=cybersecurity%20concept%20with%20digital%20lock%2C%20shield%2C%20and%20binary%20code%2C%20computer%20security%20visualization%20with%20blue%20technology%20background&width=600&height=400&seq=13&orientation=landscape"
+                            alt="Cybersecurity" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Technology</span>
+                                <span class="text-xs text-gray-500">9 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Cybersecurity Essentials for Small
+                                Businesses</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">Small businesses are increasingly
+                                targeted by cybercriminals. This comprehensive guide covers the essential security
+                                measures every small business should implement to protect sensitive data and maintain
+                                customer trust.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20man%20with%20beard%20and%20glasses%2C%20neutral%20background%2C%20tech%20professional%20attire&width=100&height=100&seq=14&orientation=squarish"
+                                        alt="Michael Thompson" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Michael Thompson</span>
+                                </div>
+                                <span class="text-xs text-gray-500">March 25, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 8 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=financial%20investment%20concept%20with%20stock%20market%20charts%2C%20calculator%2C%20and%20financial%20reports%20on%20a%20modern%20desk%20with%20digital%20displays&width=600&height=400&seq=15&orientation=landscape"
+                            alt="Investment Strategies" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Finance</span>
+                                <span class="text-xs text-gray-500">7 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Investment Strategies for Uncertain
+                                Economic Times</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">Market volatility can be challenging for
+                                investors. Learn about resilient investment approaches that can help you navigate
+                                economic uncertainty while building long-term wealth and financial security.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20an%20older%20man%20with%20white%20hair%2C%20neutral%20background%2C%20financial%20advisor%20professional%20attire&width=100&height=100&seq=16&orientation=squarish"
+                                        alt="Robert Williams" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Robert Williams</span>
+                                </div>
+                                <span class="text-xs text-gray-500">March 22, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Blog Card 9 -->
+                <article class="blog-card bg-white rounded shadow-sm overflow-hidden">
+                    <a href="#" class="block">
+                        <img src="https://readdy.ai/api/search-image?query=leadership%20and%20team%20collaboration%20concept%20with%20diverse%20business%20team%20in%20modern%20office%20meeting%20room%20discussing%20strategy&width=600&height=400&seq=17&orientation=landscape"
+                            alt="Leadership Skills" class="w-full h-48 object-cover object-top">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">Leadership</span>
+                                <span class="text-xs text-gray-500">6 min read</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Essential Leadership Skills for the Modern
+                                Workplace</h2>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">Leadership requirements are evolving in
+                                our rapidly changing work environment. Discover the critical skills that effective
+                                leaders need to inspire teams, drive innovation, and navigate complex organizational
+                                challenges.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <img src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20woman%20with%20short%20blonde%20hair%2C%20neutral%20background%2C%20executive%20business%20attire&width=100&height=100&seq=18&orientation=squarish"
+                                        alt="Sarah Anderson" class="w-8 h-8 rounded-full object-cover">
+                                    <span class="text-sm font-medium text-gray-700">Sarah Anderson</span>
+                                </div>
+                                <span class="text-xs text-gray-500">March 20, 2025</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+            </div>
+
+            <div class="mt-10 flex justify-center">
+                <nav class="inline-flex items-center">
+                    <button
+                        class="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                        disabled>
+                        <div class="w-5 h-5 flex items-center justify-center">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </div>
+                    </button>
+                    <button class="px-3 py-1 border-t border-b border-gray-300 bg-primary text-white">1</button>
+                    <button
+                        class="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button
+                        class="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-500">...</button>
+                    <button
+                        class="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">12</button>
+                    <button
+                        class="px-3 py-1 rounded-r-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                        <div class="w-5 h-5 flex items-center justify-center">
+                            <i class="ri-arrow-right-s-line"></i>
+                        </div>
+                    </button>
+                </nav>
+            </div>
+        </section>
+
+        <aside class="w-full md:w-1/4">
+            <div class="bg-white rounded shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Popular Categories</h3>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Technology
+                        (24)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Business
+                        (18)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Design
+                        (15)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Marketing
+                        (12)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">AI
+                        (10)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Leadership
+                        (9)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Finance
+                        (8)</a>
+                    <a href="#"
+                        class="category-pill px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Lifestyle
+                        (7)</a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Trending Posts</h3>
+                <div class="space-y-4">
+                    <a href="#" class="flex items-start space-x-3 group">
+                        <img src="https://readdy.ai/api/search-image?query=artificial%20intelligence%20visualization%20with%20glowing%20blue%20neural%20network%20connections&width=100&height=100&seq=19&orientation=squarish"
+                            alt="AI Ethics" class="w-16 h-16 rounded object-cover flex-shrink-0">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                AI Ethics: Balancing Innovation and Responsibility</h4>
+                            <p class="text-xs text-gray-500 mt-1">8,245 views</p>
+                        </div>
+                    </a>
+                    <a href="#" class="flex items-start space-x-3 group">
+                        <img src="https://readdy.ai/api/search-image?query=modern%20office%20workspace%20with%20laptop%20and%20coffee&width=100&height=100&seq=20&orientation=squarish"
+                            alt="Remote Work" class="w-16 h-16 rounded object-cover flex-shrink-0">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                The Future of Remote Work: Trends to Watch in 2025</h4>
+                            <p class="text-xs text-gray-500 mt-1">7,129 views</p>
+                        </div>
+                    </a>
+                    <a href="#" class="flex items-start space-x-3 group">
+                        <img src="https://readdy.ai/api/search-image?query=cybersecurity%20concept%20with%20digital%20lock%20and%20shield&width=100&height=100&seq=21&orientation=squarish"
+                            alt="Cybersecurity" class="w-16 h-16 rounded object-cover flex-shrink-0">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                Cybersecurity Essentials for Small Businesses</h4>
+                            <p class="text-xs text-gray-500 mt-1">6,587 views</p>
+                        </div>
+                    </a>
+                    <a href="#" class="flex items-start space-x-3 group">
+                        <img src="https://readdy.ai/api/search-image?query=sustainable%20green%20business%20concept%20with%20plant%20growing%20from%20coins&width=100&height=100&seq=22&orientation=squarish"
+                            alt="Sustainable Business" class="w-16 h-16 rounded object-cover flex-shrink-0">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                Sustainable Business Models That Are Changing Industries</h4>
+                            <p class="text-xs text-gray-500 mt-1">5,932 views</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 rounded p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Subscribe to Our Newsletter</h3>
+                <p class="text-sm text-gray-600 mb-4">Get the latest articles and insights delivered to your inbox
+                    weekly.</p>
+                <form class="space-y-3">
+                    <div>
+                        <input type="text" placeholder="Your name"
+                            class="w-full px-4 py-2 text-sm border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <div>
+                        <input type="email" placeholder="Your email address"
+                            class="w-full px-4 py-2 text-sm border-none rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <button type="submit"
+                        class="w-full px-4 py-2 bg-primary text-white font-medium rounded-button hover:bg-primary/90 transition-colors whitespace-nowrap">Subscribe
+                        Now</button>
+                </form>
+                <p class="text-xs text-gray-500 mt-3">By subscribing, you agree to our Privacy Policy and consent to
+                    receive updates from our company.</p>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="bg-gray-900 text-white pt-12 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <a href="#" class="text-2xl font-['Pacifico'] text-white mb-4 block">logo</a>
+                    <p class="text-gray-400 text-sm mb-4">Delivering insightful content to help professionals stay ahead
+                        in a rapidly evolving world.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <div class="w-6 h-6 flex items-center justify-center">
+                                <i class="ri-twitter-x-fill"></i>
+                            </div>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <div class="w-6 h-6 flex items-center justify-center">
+                                <i class="ri-facebook-fill"></i>
+                            </div>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <div class="w-6 h-6 flex items-center justify-center">
+                                <i class="ri-instagram-fill"></i>
+                            </div>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <div class="w-6 h-6 flex items-center justify-center">
+                                <i class="ri-linkedin-fill"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Categories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Technology</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Business</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Design</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Marketing</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">AI & Data</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Leadership</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Advertise</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Press Kit</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                        </li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Accessibility</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm">© 2025 logo. All rights reserved.</p>
+                <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                    <div class="w-8 h-5 flex items-center justify-center">
+                        <i class="ri-visa-fill text-gray-400"></i>
+                    </div>
+                    <div class="w-8 h-5 flex items-center justify-center">
+                        <i class="ri-mastercard-fill text-gray-400"></i>
+                    </div>
+                    <div class="w-8 h-5 flex items-center justify-center">
+                        <i class="ri-paypal-fill text-gray-400"></i>
+                    </div>
+                    <div class="w-8 h-5 flex items-center justify-center">
+                        <i class="ri-apple-fill text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <button id="backToTop" class="back-to-top fixed bottom-6 right-6 p-3 bg-primary text-white rounded-full shadow-lg">
+        <div class="w-5 h-5 flex items-center justify-center">
+            <i class="ri-arrow-up-line"></i>
+        </div>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const backToTopButton = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            });
+
+            backToTopButton.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryDropdown = document.getElementById('categoryDropdown');
+            const categoryMenu = document.getElementById('categoryMenu');
+
+            categoryDropdown.addEventListener('click', function () {
+                categoryMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!categoryDropdown.contains(event.target) && !categoryMenu.contains(event.target)) {
+                    categoryMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const viewToggle = document.getElementById('viewToggle');
+            const blogGrid = document.querySelector('.grid');
+
+            viewToggle.addEventListener('change', function () {
+                if (this.checked) {
+                    blogGrid.classList.remove('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+                    blogGrid.classList.add('grid-cols-1');
+
+                    const blogCards = document.querySelectorAll('.blog-card');
+                    blogCards.forEach(card => {
+                        const imgContainer = card.querySelector('img').parentElement;
+                        const contentContainer = card.querySelector('.p-5').parentElement;
+
+                        imgContainer.classList.add('flex');
+                        contentContainer.classList.add('flex');
+                        card.classList.add('flex');
+
+                        const img = card.querySelector('img');
+                        img.classList.remove('w-full', 'h-48');
+                        img.classList.add('w-1/3', 'h-auto');
+
+                        const content = card.querySelector('.p-5');
+                        content.classList.add('w-2/3');
+                    });
+                } else {
+                    blogGrid.classList.remove('grid-cols-1');
+                    blogGrid.classList.add('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+
+                    const blogCards = document.querySelectorAll('.blog-card');
+                    blogCards.forEach(card => {
+                        const imgContainer = card.querySelector('img').parentElement;
+                        const contentContainer = card.querySelector('.p-5').parentElement;
+
+                        imgContainer.classList.remove('flex');
+                        contentContainer.classList.remove('flex');
+                        card.classList.remove('flex');
+
+                        const img = card.querySelector('img');
+                        img.classList.remove('w-1/3', 'h-auto');
+                        img.classList.add('w-full', 'h-48');
+
+                        const content = card.querySelector('.p-5');
+                        content.classList.remove('w-2/3');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
